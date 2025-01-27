@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free Recharge</title>
+    <style>
+        /* Existing CSS styles ... */
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        .hd {
+            text-align: center;
+            border: 1px solid #ccc;
+            margin: 1px;
+            border-radius: 5px;
+            color: white;
+            background: linear-gradient(90deg, red, yellow, green);
+            animation: bg 5s linear infinite;
+        }
+
+        @keyframes bg {
+            100% {
+                filter: hue-rotate(180deg);
+            }
+        }
+
+        .image-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px; 
+        }
+
+        .image-circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            overflow: hidden;
+            box-shadow: 2px 2px 10px black;
+        }
+
+        .ad-space {
+            background-color: #f0f0f0;
+            text-align: center;
+            padding: 10px;
+            margin: 20px 0;
+            border: 1px dashed #ccc;
+        }
+
+        .plan-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr; 
+            gap: 20px;
+            width: 90%;
+            max-width: 800px;
+            margin: 20px auto;
+            border: 1px solid blue;
+        }
+
+        .plan-card {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 10px 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            border: 2px solid transparent;
+            transition: 0.3s ease-in-out;
+            cursor: pointer;
+            display: flex; 
+            flex-direction: column; 
+            justify-content: space-between;
+            height: 200px;
+        }
+
+        .plan-card:hover {
+            border-color: #007bff;
+        }
+
+        .plan-card.selected {
+            border-color: #007bff;
+            background-color: #e6f7ff;
+        }
+
+        .plan-price {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .plan-details {
+            font-size: 0.9em;
+            margin: 10px 0;
+            color: #666;
+        }
+
+        .form-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        input, select, button {
+            margin: 10px 0;
+            padding: 10px;
+            width: 200px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .error-message {
+            color: red;
+            margin-top: 10px;
+            animation: blink 1s step-start infinite; /* Blink animation */
+        }
+
+        @keyframes blink {
+            0%, 100% {
+                opacity: 1; /* Visible */
+            }
+            50% {
+                opacity: 0; /* Invisible */
+            }
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; 
+            z-index: 1; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.4); 
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto; 
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; 
+            max-width: 500px;
+            text-align: center;
+            border-radius: 8px;
+        }
+
+        .modal-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            padding: 10px 20px;
+        }
+
+        .modal-button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Progress Bar Styles */
+        .progress-container {
+            width: 100%;
+            height: 5px;
+            background-color: #e0e0e0;
+            margin: 10px 0;
+            border-radius: 5px;
+            display: none; /* Hidden by default */
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0;
+            background-color: #007bff;
+            border-radius: 5px;
+        }
+    </style>
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
+        import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCmMg6g2dV-2qU55Lwndq2C-1zuU7kHdm4",
+            authDomain: "recharge-b22c2.firebaseapp.com",
+            projectId: "recharge-b22c2",
+            storageBucket: "recharge-b22c2.appspot.com",
+            messagingSenderId: "391693380568",
+            appId: "1:391693380568:web:5896ba2a71f6b0d9f960ad",
+            measurementId: "G-3W4YWGDJQT"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // Function to save data to Firebase
+        window.saveDataToFirebase = function(fullName, mobileNumber, planPrice) {
+            const transactionId = 'TXN' + Math.floor(100000 + Math.random() * 900000);
+
+            // Save data to Firebase
+            push(ref(database, 'recharges/'), {
+                name: fullName,
+                mobile: mobileNumber,
+                plan: planPrice,
+                transactionId: transactionId,
+                timestamp: Date.now() // Save timestamp
+            }).then(() => {
+                console.log("Data saved successfully.");
+            }).catch((error) => {
+                console.error("Error saving data: ", error);
+            });
+        }
+        
+        // Other functions (submitForm, openModal, etc.) remain the same...
+    </script>
+</head>
+<body>
+    <div class="hd">
+        <h1>Free Recharge</h1>
+    </div>
+
+    <!-- Ad Space -->
+    <div class="ad-space">
+        <!-- Example Ad Content -->
+        <p>Ad Space: Promote your product here!</p>
+    </div>
+    
+    <div class="image-container">
+        <img src="https://i.postimg.cc/tgzKSqLq/images-2.jpg" alt="logo" class="image-circle">
+    </div>
+    
+    <div class="plan-container">
+        <div class="plan-card" onclick="selectPlan(this)">
+            <div class="plan-price">₹349</div>
+            <div class="plan-details">
+                <p>Validity: 28 Days</p>
+                <p>Data: Unlimited 5G + 2GB/day</p>
+                <p>Voice: Unlimited Calls | SMS: 100 SMS/day</p>
+            </div>
+        </div>
+        
+        <div class="plan-card" onclick="selectPlan(this)">
+            <div class="plan-price">₹299</div>
+            <div class="plan-details">
+                <p>Validity: 28 Days</p>
+                <p>Data: 1.5 GB/day</p>
+                <p>Voice: Unlimited Calls | SMS: 100 SMS/day</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-container">
+        <input type="text" id="fullName" placeholder="Enter Your Full Name">
+        <input type="number" id="mobileNumber" placeholder="Enter Your Number">
+        <select id="planSelect">
+            <option value="" disabled selected>Select an Option</option>
+            <option value="jio">Jio</option>
+            <option value="vi">VI</option>
+            <option value="airtel">Airtel</option>
+        </select>
+        <button type="button" onclick="submitForm()">Submit</button>
+        <div class="error-message" id="errorMessage"></div>
+    </div>
+
+    <!-- Modal Structure -->
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <h2>Confirmation</h2>
+            <p id="confirmationMessage"></p>
+            <p>Transaction ID: <span id="transactionId"></span></p>
+            <p>Wait for 24 hours for recharge to be done.</p>
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <button class="modal-button" onclick="shareTransaction()">Share</button>
+        </div>
+    </div>
+
+    <script>
+        let selectedPlan = null;
+
+        function selectPlan(card) {
+            const allCards = document.querySelectorAll('.plan-card');
+            allCards.forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            selectedPlan = card; // Store the selected plan
+        }
+
+        function submitForm() {
+            const fullName = document.getElementById('fullName').value;
+            const mobileNumber = document.getElementById('mobileNumber').value;
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.textContent = ''; // Clear previous error messages
+
+            // Validate mobile number
+            if (mobileNumber.length !== 10) {
+                errorMessage.textContent = 'Please enter a valid 10-digit mobile number.';
+                return;
+            }
+
+            // Validate plan selection
+            if (!selectedPlan) {
+                errorMessage.textContent = 'Please select a plan before submitting.';
+                return;
+            }
+
+            // If all validations pass, save data to Firebase
+            const planPrice = selectedPlan.querySelector('.plan-price').textContent;
+            saveDataToFirebase(fullName, mobileNumber, planPrice);
+
+            // Show modal
+            openModal(mobileNumber);
+        }
+
+        function openModal(mobileNumber) {
+            const modal = document.getElementById("myModal");
+            const confirmationMessage = document.getElementById("confirmationMessage");
+            const transactionId = document.getElementById("transactionId");
+            const progressContainer = document.getElementById("progressContainer");
+            const progressBar = document.getElementById("progressBar");
+
+            // Generate a random transaction ID
+            transactionId.textContent = 'TXN' + Math.floor(100000 + Math.random() * 900000);
+            confirmationMessage.textContent = `Your Recharge ${selectedPlan.querySelector('.plan-price').textContent} Successful To ${mobileNumber}`;
+            
+            // Show the modal and progress bar
+            modal.style.display = "block"; // Show the modal
+            progressContainer.style.display = "block"; // Show the progress bar
+
+            // Animate the progress bar
+            let width = 0;
+            const interval = setInterval(() => {
+                if (width >= 100) {
+                    clearInterval(interval);
+                } else {
+                    width++;
+                    progressBar.style.width = width + '%'; // Update progress bar width
+                }
+            }, 100); // Change the interval time as needed
+        }
+
+        function shareTransaction() {
+            const link = window.location.href; // Current page URL
+            const message = "Free Recharge Yojana: " + link;
+            const whatsappUrl = "https://wa.me/?text=" + encodeURIComponent(message);
+            window.open(whatsappUrl, '_blank'); // Open WhatsApp with the message
+        }
+
+        // Close the modal when the user clicks anywhere outside of it
+        window.onclick = function(event) {
+            const modal = document.getElementById("myModal");
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    </script>
+</body>
+</html>
